@@ -13,6 +13,9 @@ def initialize_game():
         except Exception as e:
             st.error(f"Failed to load game data: {e}")
             st.stop()
+    
+    if 'step' not in st.session_state:
+        st.session_state.step = 'bet'
 
 def main():
     st.set_page_config(page_title="MindPatch Prototype", layout="centered")
@@ -28,9 +31,20 @@ def main():
         progress = engine.current_round_index / engine.total_rounds
         st.progress(progress)
     
-    # Debug Output
-    st.write("Current Round Data (Debug):")
-    st.write(engine.get_current_round_data())
+    # Game Logic
+    current_data = engine.get_current_round_data()
+    
+    if current_data and st.session_state.step == 'bet':
+        st.header(f"Claim: {current_data['claim']}")
+        
+        slider_val = st.slider("Your Stance", 0, 100, 50)
+        
+        if st.button("🔒 Lock In"):
+            engine.set_locked_value(slider_val)
+            st.session_state.step = 'attack'
+            st.rerun()
+    elif current_data is None:
+        st.success("Game Over! Thanks for playing.")
 
 if __name__ == "__main__":
     main()
