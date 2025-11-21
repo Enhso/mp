@@ -49,3 +49,46 @@ def test_game_session_initialization():
     
     round_data = session.get_current_round_data()
     assert round_data == data[0]
+
+def test_game_session_scoring():
+    data = [
+        {
+            "id": 1, 
+            "text": "Round 1", 
+            "category": "PATHOS", 
+            "technique": "Appeal to Fear"
+        },
+        {
+            "id": 2, 
+            "text": "Round 2", 
+            "category": "LOGOS", 
+            "technique": "Appeal to Logic"
+        }
+    ]
+    session = GameSession(data)
+    
+    # Round 1
+    session.set_locked_value(50)
+    session.submit_turn(70)
+    
+    assert len(session.scores) == 1
+    score = session.scores[0]
+    assert score['round_id'] == 0
+    assert score['delta'] == 20  # abs(70 - 50)
+    assert score['category'] == "PATHOS"
+    assert score['technique'] == "Appeal to Fear"
+    
+    assert session.current_round_index == 1
+    assert session.locked_value is None
+    
+    # Round 2
+    session.set_locked_value(30)
+    session.submit_turn(25)
+    
+    assert len(session.scores) == 2
+    score = session.scores[1]
+    assert score['round_id'] == 1
+    assert score['delta'] == 5   # abs(25 - 30)
+    
+    assert session.current_round_index == 2
+    assert session.is_game_over()

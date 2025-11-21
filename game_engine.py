@@ -35,3 +35,25 @@ class GameSession:
 
     def is_game_over(self):
         return self.current_round_index >= self.total_rounds
+
+    def set_locked_value(self, val):
+        self.locked_value = val
+
+    def submit_turn(self, final_value):
+        if self.locked_value is None:
+            raise ValueError("Locked value must be set before submitting turn.")
+        
+        current_data = self.get_current_round_data()
+        delta = abs(final_value - self.locked_value)
+        
+        score_entry = {
+            'round_id': self.current_round_index,
+            'category': current_data.get('category'),
+            'delta': delta,
+            'technique': current_data.get('technique'),
+            'data': current_data
+        }
+        self.scores.append(score_entry)
+        
+        self.current_round_index += 1
+        self.locked_value = None
