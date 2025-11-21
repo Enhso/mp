@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+from annotated_text import annotated_text
 from game_engine import load_game_data, GameSession
 
 # Constants
@@ -61,8 +62,50 @@ def main():
                 st.session_state.step = 'bet'
             st.rerun()
 
+    elif st.session_state.step == 'finished':
+        st.success("Game Over! Here is your X-Ray Analysis:")
+        
+        results = engine.get_results_summary()
+        if results['weakness']:
+            st.error(f"⚠️ Your Primary Weakness: {results['weakness']}")
+        
+        st.divider()
+        
+        for score in engine.scores:
+            # Only show analysis if the user was swayed significantly (e.g., > 10 points)
+            if score['delta'] > 10:
+                st.subheader(f"Round {score['round_id'] + 1}: {score['category']}")
+                st.write(f"You were swayed by **{score['delta']} points**.")
+                
+                data = score['data']
+                trigger = data['trigger_fragment']
+                full_text = data['argument_text']
+                
+                # Split text to highlight trigger
+                parts = full_text.split(trigger)
+                
+                if len(parts) >= 2:
+                    annotated_text(
+                        parts[0],
+                        (trigger, score['technique'], "#faa"),
+                        parts[1]
+                    )
+                else:
+                    st.write(full_text)
+                
+                with st.expander("🛡️ See Antidote"):
+                    st.info(data['antidote'])
+                
+                st.divider()
+        
+        if st.button("Restart Game"):
+            st.session_state.clear()
+            st.rerun()
+
     elif current_data is None:
-        st.success("Game Over! Thanks for playing.")
+        # Fallback if something goes wrong with state
+        st.session_state.step = 'finished'
+        st.rerun()
 
 if __name__ == "__main__":
     main()
