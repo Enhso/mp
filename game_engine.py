@@ -19,3 +19,19 @@ def load_game_data(filepath):
             raise ValueError(f"Trigger fragment '{trigger}' not found in argument text for item ID {item.get('id')}")
             
     return data
+
+class GameSession:
+    def __init__(self, data):
+        self.data = data
+        self.current_round_index = 0
+        self.scores = []
+        self.locked_value = None
+        self.total_rounds = len(data)
+
+    def get_current_round_data(self):
+        if self.is_game_over():
+            return None
+        return self.data[self.current_round_index]
+
+    def is_game_over(self):
+        return self.current_round_index >= self.total_rounds

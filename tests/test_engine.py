@@ -1,7 +1,7 @@
 import pytest
 import json
 import os
-from game_engine import load_game_data
+from game_engine import load_game_data, GameSession
 
 def test_load_game_data_valid(tmp_path):
     # Create a valid temporary JSON file
@@ -33,3 +33,19 @@ def test_load_game_data_invalid_fragment(tmp_path):
     
     with pytest.raises(ValueError, match="Trigger fragment 'missing fragment' not found"):
         load_game_data(str(d))
+
+def test_game_session_initialization():
+    data = [
+        {"id": 1, "text": "Round 1"},
+        {"id": 2, "text": "Round 2"}
+    ]
+    session = GameSession(data)
+    
+    assert session.current_round_index == 0
+    assert session.scores == []
+    assert session.locked_value is None
+    assert session.total_rounds == 2
+    assert not session.is_game_over()
+    
+    round_data = session.get_current_round_data()
+    assert round_data == data[0]
