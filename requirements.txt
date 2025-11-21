@@ -1,4 +1,4 @@
 streamlit
-pandas
+polars
 pytest
-streamlit-annotated-text
+st-annotated-text
