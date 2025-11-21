@@ -57,3 +57,27 @@ class GameSession:
         
         self.current_round_index += 1
         self.locked_value = None
+
+    def get_results_summary(self):
+        if not self.scores:
+            return {'weakness': None, 'stats': {}}
+            
+        stats = {}
+        counts = {}
+        
+        for score in self.scores:
+            cat = score['category']
+            delta = score['delta']
+            stats[cat] = stats.get(cat, 0) + delta
+            counts[cat] = counts.get(cat, 0) + 1
+            
+        # Calculate averages
+        avg_stats = {cat: total / counts[cat] for cat, total in stats.items()}
+        
+        # Find weakness (highest average delta)
+        weakness = max(avg_stats, key=avg_stats.get) if avg_stats else None
+        
+        return {
+            'weakness': weakness,
+            'stats': avg_stats
+        }

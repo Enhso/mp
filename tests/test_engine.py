@@ -92,3 +92,28 @@ def test_game_session_scoring():
     
     assert session.current_round_index == 2
     assert session.is_game_over()
+
+def test_results_summary():
+    data = [{"id": 1}, {"id": 2}, {"id": 3}]
+    session = GameSession(data)
+    
+    # Manually populate scores
+    session.scores = [
+        {'category': 'PATHOS', 'delta': 20},
+        {'category': 'PATHOS', 'delta': 10},  # Avg: 15
+        {'category': 'LOGOS', 'delta': 5},    # Avg: 5
+        {'category': 'ETHOS', 'delta': 2}     # Avg: 2
+    ]
+    
+    summary = session.get_results_summary()
+    
+    assert summary['weakness'] == 'PATHOS'
+    assert summary['stats']['PATHOS'] == 15.0
+    assert summary['stats']['LOGOS'] == 5.0
+    assert summary['stats']['ETHOS'] == 2.0
+    
+    # Test empty scores
+    session.scores = []
+    summary = session.get_results_summary()
+    assert summary['weakness'] is None
+    assert summary['stats'] == {}

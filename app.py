@@ -43,6 +43,24 @@ def main():
             engine.set_locked_value(slider_val)
             st.session_state.step = 'attack'
             st.rerun()
+
+    elif current_data and st.session_state.step == 'attack':
+        st.header(f"Claim: {current_data['claim']}")
+        st.info(f"🔒 You locked in at: {engine.locked_value}")
+        
+        st.warning(current_data['argument_text'])
+        
+        new_slider_val = st.slider("Does this change your view?", 0, 100, engine.locked_value)
+        
+        if st.button("Submit Final Position"):
+            engine.submit_turn(new_slider_val)
+            
+            if engine.is_game_over():
+                st.session_state.step = 'finished'
+            else:
+                st.session_state.step = 'bet'
+            st.rerun()
+
     elif current_data is None:
         st.success("Game Over! Thanks for playing.")
 
