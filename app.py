@@ -34,10 +34,11 @@ def main():
     
     st.title("MindPatch Prototype")
     
-    # Progress Bar
+    # Progress Bar (avoid divide-by-zero when no rounds exist)
+    progress = 0.0
     if engine.total_rounds > 0:
         progress = engine.current_round_index / engine.total_rounds
-        st.progress(progress)
+    st.progress(progress)
     
     # Game Logic
     current_data = engine.get_current_round_data()
