@@ -20,6 +20,15 @@ def load_game_data(filepath):
 
         if trigger not in text:
             raise ValueError(f"Trigger fragment '{trigger}' not found in argument text for item ID {item.get('id')}")
+
+        category = item.get('category')
+        technique = item.get('technique')
+
+        if not isinstance(category, str) or not category.strip():
+            raise ValueError(f"Missing or invalid 'category' in item {item.get('id')}")
+
+        if not isinstance(technique, str) or not technique.strip():
+            raise ValueError(f"Missing or invalid 'technique' in item {item.get('id')}")
             
     return data
 
