@@ -88,7 +88,7 @@ def test_game_session_scoring():
     assert len(session.scores) == 2
     score = session.scores[1]
     assert score['round_id'] == 1
-    assert score['delta'] == 5   # abs(25 - 30)
+    assert score['delta'] == -5   # 25 - 30 (signed sway)
     
     assert session.current_round_index == 2
     assert session.is_game_over()

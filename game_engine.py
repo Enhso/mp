@@ -47,7 +47,9 @@ class GameSession:
             raise ValueError("Locked value must be set before submitting turn.")
         
         current_data = self.get_current_round_data()
-        delta = abs(final_value - self.locked_value)
+        # Calculate sway (persuasion success). Positive means moved towards agreement with argument.
+        # Negative means backfire effect (moved away).
+        delta = final_value - self.locked_value
         
         score_entry = {
             'round_id': self.current_round_index,
