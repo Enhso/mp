@@ -12,9 +12,12 @@ def load_game_data(filepath):
         data = json.load(f)
 
     for item in data:
-        trigger = item.get('trigger_fragment', '')
+        trigger = item.get('trigger_fragment')
         text = item.get('argument_text', '')
         
+        if not trigger:
+            raise ValueError(f"Missing 'trigger_fragment' in item {item.get('id')}")
+
         if trigger not in text:
             raise ValueError(f"Trigger fragment '{trigger}' not found in argument text for item ID {item.get('id')}")
             
