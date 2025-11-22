@@ -6,10 +6,14 @@ from annotated_text import annotated_text
 from game_engine import load_game_data, GameSession
 
 # Constants
-DATA_FILE = os.path.join(os.path.dirname(__file__), 'data', 'game_data.json')
+DATA_FILE = os.environ.get('GAME_DATA_FILE', os.path.join(os.path.dirname(__file__), 'data', 'game_data.json'))
 
 def initialize_game():
     if 'engine' not in st.session_state:
+        if not os.path.exists(DATA_FILE):
+            st.error(f"Game data file not found at: {DATA_FILE}. Please ensure the file exists or set GAME_DATA_FILE environment variable.")
+            st.stop()
+
         try:
             data = load_game_data(DATA_FILE)
             st.session_state.engine = GameSession(data)
