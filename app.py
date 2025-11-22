@@ -1,5 +1,7 @@
 import streamlit as st
 import os
+import plotly.express as px
+import pandas as pd
 from annotated_text import annotated_text
 from game_engine import load_game_data, GameSession
 
@@ -16,7 +18,7 @@ def initialize_game():
             st.stop()
     
     if 'step' not in st.session_state:
-        st.session_state.step = 'bet'
+        st.session_state.step = 'intro'
 
 def main():
     st.set_page_config(page_title="MindPatch Prototype", layout="centered")
@@ -35,7 +37,28 @@ def main():
     # Game Logic
     current_data = engine.get_current_round_data()
     
-    if current_data and st.session_state.step == 'bet':
+    if st.session_state.step == 'intro':
+        st.markdown("""
+        ### Welcome to MindPatch 🧷
+        
+        **Can you be manipulated?**
+        
+        MindPatch is a cognitive immunology training tool. In this simulation, we will test your resistance to persuasive rhetoric.
+        
+        **How it works:**
+        1. You'll see a controversial claim.
+        2. You'll take a stance (0-100%).
+        3. You'll be exposed to a counter-argument designed to exploit specific cognitive vulnerabilities.
+        4. You'll decide if your stance has shifted.
+        
+        At the end, we'll analyze which rhetorical techniques you are most susceptible to.
+        """)
+        
+        if st.button("Start Simulation", type="primary"):
+            st.session_state.step = 'bet'
+            st.rerun()
+
+    elif current_data and st.session_state.step == 'bet':
         st.header(f"Claim: {current_data['claim']}")
         
         slider_val = st.slider("Your Stance", 0, 100, 50)
@@ -55,7 +78,34 @@ def main():
         
         if st.button("Submit Final Position"):
             engine.submit_turn(new_slider_val)
-            
+            st.session_state.step = 'feedback'
+            st.rerun()
+
+    elif st.session_state.step == 'feedback':
+        last_score = engine.scores[-1]
+        delta = last_score['delta']
+        data = last_score['data']
+        
+        st.header("Round Feedback")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Shift in Stance", f"{delta}")
+        
+        with col2:
+            if delta < 10:
+                st.success("🛡️ **Resilient!** You held your ground.")
+            elif delta < 30:
+                st.warning("⚠️ **Wavering.** You were slightly influenced.")
+            else:
+                st.error("🚨 **Vulnerable!** You were significantly swayed.")
+        
+        st.divider()
+        
+        # Reflection
+        st.text_area("Reflection: Why did this work (or not work) on you?", placeholder="I felt that...")
+        
+        if st.button("Next Round"):
             if engine.is_game_over():
                 st.session_state.step = 'finished'
             else:
@@ -66,6 +116,15 @@ def main():
         st.success("Game Over! Here is your X-Ray Analysis:")
         
         results = engine.get_results_summary()
+        
+        # Radar Chart
+        if results['stats']:
+            st.subheader("Vulnerability Profile")
+            df = pd.DataFrame(list(results['stats'].items()), columns=['Category', 'Vulnerability'])
+            fig = px.line_polar(df, r='Vulnerability', theta='Category', line_close=True)
+            fig.update_traces(fill='toself')
+            st.plotly_chart(fig)
+
         if results['weakness']:
             st.error(f"⚠️ Your Primary Weakness: {results['weakness']}")
         
@@ -75,6 +134,7 @@ def main():
             # Only show analysis if the user was swayed significantly (e.g., > 10 points)
             if score['delta'] > 10:
                 st.subheader(f"Round {score['round_id'] + 1}: {score['category']}")
+                st.write(f"Technique: **{score['technique']}**")
                 st.write(f"You were swayed by **{score['delta']} points**.")
                 
                 data = score['data']

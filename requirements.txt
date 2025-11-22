@@ -2,3 +2,5 @@ streamlit
 polars
 pytest
 st-annotated-text
+plotly
+pandas
