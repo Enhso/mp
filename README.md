@@ -25,7 +25,7 @@ At the end of the session, the "X-Ray Analysis" reveals:
 
 1.  **Clone the repository:**
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/Enhso/mp.git
     cd mp
     ```
 
