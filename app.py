@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import re
 import plotly.express as px
 import pandas as pd
 from annotated_text import annotated_text
@@ -146,16 +147,16 @@ def main():
                 full_text = data['argument_text']
                 
                 # Split text to highlight trigger
-                parts = full_text.split(trigger)
+                parts = re.split(f"({re.escape(trigger)})", full_text, flags=re.IGNORECASE)
                 
-                if len(parts) >= 2:
-                    annotated_text(
-                        parts[0],
-                        (trigger, score['technique'], "#faa"),
-                        parts[1]
-                    )
-                else:
-                    st.write(full_text)
+                annotated_parts = []
+                for part in parts:
+                    if part.lower() == trigger.lower():
+                        annotated_parts.append((part, score['technique'], "#faa"))
+                    elif part:
+                        annotated_parts.append(part)
+                
+                annotated_text(*annotated_parts)
                 
                 with st.expander("🛡️ See Antidote"):
                     st.info(data['antidote'])
